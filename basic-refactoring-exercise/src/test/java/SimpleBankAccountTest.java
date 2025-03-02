@@ -10,44 +10,64 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class SimpleBankAccountTest {
 
+    private static final int INITIAL_BALANCE = 0;
+    private static final int FIRST_DEPOSIT = 100;
+    private static final int INVALID_USER_ID = 2;
+
     private AccountHolder accountHolder;
     private BankAccount bankAccount;
 
     @BeforeEach
     void beforeEach(){
         accountHolder = new AccountHolder("Mario", "Rossi", 1);
-        bankAccount = new SimpleBankAccount(accountHolder, 0);
+        bankAccount = new SimpleBankAccount(accountHolder, INITIAL_BALANCE);
     }
 
     @Test
     void testInitialBalance() {
-        assertEquals(0, bankAccount.getBalance());
+        assertEquals(INITIAL_BALANCE, bankAccount.getBalance());
     }
 
     @Test
     void testDeposit() {
-        bankAccount.deposit(accountHolder.getId(), 100);
-        assertEquals(100, bankAccount.getBalance());
+        bankAccount.deposit(accountHolder.getId(), FIRST_DEPOSIT);
+        assertEquals(FIRST_DEPOSIT, bankAccount.getBalance());
     }
 
     @Test
-    void testWrongDeposit() {
-        bankAccount.deposit(accountHolder.getId(), 100);
-        bankAccount.deposit(2, 50);
-        assertEquals(100, bankAccount.getBalance());
+    void testWrongIdDeposit() {
+        final int invalidDeposit = 50;
+
+        bankAccount.deposit(accountHolder.getId(), FIRST_DEPOSIT); // Deposito valido
+        bankAccount.deposit(INVALID_USER_ID, invalidDeposit); // Tentativo di deposito con ID errato
+
+        final int expectedBalance = INITIAL_BALANCE + FIRST_DEPOSIT;
+
+        assertEquals(expectedBalance, bankAccount.getBalance());
     }
 
     @Test
-    void testWithdraw() {
-        bankAccount.deposit(accountHolder.getId(), 100);
-        bankAccount.withdraw(accountHolder.getId(), 70);
-        assertEquals(30, bankAccount.getBalance());
+    void testWithdrawWithoutFee() {
+        final int withdrawAmount = 50;
+
+        bankAccount.deposit(accountHolder.getId(), FIRST_DEPOSIT);
+        bankAccount.withdraw(accountHolder.getId(), withdrawAmount);
+
+        final int expectedBalance = INITIAL_BALANCE + FIRST_DEPOSIT - withdrawAmount;
+
+        assertEquals(expectedBalance, bankAccount.getBalance());
     }
 
+
     @Test
-    void testWrongWithdraw() {
-        bankAccount.deposit(accountHolder.getId(), 100);
-        bankAccount.withdraw(2, 70);
-        assertEquals(100, bankAccount.getBalance());
+    void testWrongIdWithdraw() {
+        final int firstWithdrawAmount = 70;
+
+        bankAccount.deposit(accountHolder.getId(), FIRST_DEPOSIT);
+        bankAccount.withdraw(INVALID_USER_ID, firstWithdrawAmount);
+
+        final int expectedBalance = INITIAL_BALANCE + FIRST_DEPOSIT;
+
+        assertEquals(expectedBalance, bankAccount.getBalance());
     }
 }
